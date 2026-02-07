@@ -4,7 +4,7 @@ import os
 import gestion_stock 
 import finance
 
-'''initialisation'''
+
 liste_produit = []
 caract_produit = ('nom','referance','cantité','PU','PV')
 
@@ -25,6 +25,7 @@ while True :
     print(10*"==") 
     choix = int(input("entrer votre choix : "))
     nettoyer() #ici
+    
     if  choix == 1 : 
         while True : 
             produit = {}
@@ -40,25 +41,25 @@ while True :
         gestion_stock.recevoire_produit(liste_produit)
         input("\cliqur sur [ENTRER] pour revenir au menue")
 
-    elif choix == 2 : # a fortifier la logique 
+    elif choix == 2 : 
+        #donnée du produit
         ref = input("entrer la reférance du produit a vendre : ")
         result=gestion_stock.verification(ref)
+        
+        #recherche du produit
         if result == None : 
             print("produit indisponible !")
             input("\cliquer sur [ENTRER] pour revenir au menu")
         else : 
+            
+            #afficher le produit 
             print(tabulate([result], headers="keys", tablefmt="fancy_grid"))
             q_vente = int(input("saisisz la quantité a vendre : "))
             nettoyer() #ici
-            if q_vente <= int(result['cantité']) : 
-                dif = int(result['cantité']) - q_vente
-                result['cantité'] = str(dif)
-                gestion_stock.vendue(result)
-                print("produit vendue  !")
-                input("\cliqur sur [ENTRER] pour revenir au menue")
-            else : 
-                print("cantité indisponible !")
-                input("\cliqur sur [ENTRER] pour revenir au menue")
+            
+            #vendre la cantité 
+            gestion_stock.vendue(result, q_vente)
+            input("\cliqur sur [ENTRER] pour revenir au menue")       
                 
     elif choix == 3 :  
         total_stock = gestion_stock.afficher_tableu()
