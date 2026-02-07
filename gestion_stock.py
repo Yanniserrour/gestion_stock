@@ -1,8 +1,11 @@
 import csv
+import datetime
 
 #DATA
 colonne = ['nom','referance','cantité','PU','PV']
-chemain_stock = r'C:\CODE\code python\projet-gestion-stock.-py\stock.csv'
+colonne_attente = ['nom','referance','cantité','PU','PV','DV']
+chemain_stock   = r'C:\CODE\code python\projet-gestion-stock.-py\stock.csv'
+chemain_attente = r'C:\CODE\code python\projet-gestion-stock.-py\attente.csv'
 
 
 def recevoire_produit(liste_arrivage): 
@@ -44,18 +47,44 @@ def verification(ref):
                 break
         return info_produit
         
-def vendue(dicto_result): 
+def vendue(dicto_result): #probléme de logieque pour la liste d'attente
     stock_actuel=[]
     with open(chemain_stock, 'r', encoding="UTF-8", newline= '') as f : 
-        stock_actuel = list(csv.DictReader(f,delimiter=';'))
+        stock_actuel = list(csv.DictReader(f,delimiter=';')) #sortie du stock
     
-    for produit in stock_actuel :
+    for produit in stock_actuel : #maj
         if produit['referance'] == dicto_result['referance'] : 
+            dif = int(produit['cantité']) - int(dicto_result['cantité'])
+            temp_dicto = produit.copy()
+            temp_dicto['cantité'] = str(dif)
             produit['cantité'] = dicto_result['cantité']
+            
+            try :
+                with open(chemain_attente, 'r', encoding = 'UTF-8', newline='') as g : 
+                    stock_actuel_att = list(csv.DictReader(g, delimiter=';'))
+            except : 
+                pass
+                
+            Trouve = False
+            for produit_2 in stock_actuel_att : 
+                if produit_2['referance'] == temp_dicto['referance'] : 
+                    produit_2['cantité'] = temp_dicto['cantité']
+                    produit_2['DV'] = datetime.date.today()
+                    Trouve = True
+                    break
+            if Trouve == False :
+                temp_dicto['DV'] = datetime.date.today()
+                stock_actuel_att.append(temp_dicto)
+   
+            
+            with open(chemain_attente, 'w', encoding= 'UTF-8', newline='') as g : 
+                writer_2 = csv.DictWriter(g, fieldnames = colonne_attente ,delimiter=';')
+                writer_2.writeheader()
+                writer_2.writerows(stock_actuel_att)
             break
     
     
-    with open(chemain_stock, 'w', encoding = 'UTF-8', newline='') as f : 
+    with open(chemain_stock, 'w', encoding = 'UTF-8', newline='') as f : #metre dans le stock
         writer = csv.DictWriter(f, fieldnames= colonne , delimiter= ';')
         writer.writeheader()
         writer.writerows(stock_actuel)
