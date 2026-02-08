@@ -1,53 +1,22 @@
 import csv
 import datetime
+import os 
 
-#DATA
-colonne = ['nom','referance','cantité','PU','PV']
-colonne_attente = ['nom','referance','cantité','PU','PV','DV']
-chemain_stock   = r'C:\CODE\code python\projet-gestion-stock.-py\stock.csv'
-chemain_attente = r'C:\CODE\code python\projet-gestion-stock.-py\attente.csv'
-
-
-
-
-def recevoire_produit(liste_arrivage): 
-    '''reçois les produit ajouter (liste de dictionnaire)
-    et les charge dans le fichier stock'''
-    stock_actuel = []
-    print(f'reception de {len(liste_arrivage)} produit(s)')
-    #lire le fichier en entier : 
-    with open(chemain_stock, 'r', encoding = 'UTF-8',newline='') as f : 
-            stock_actuel=list(csv.DictReader(f,delimiter=';'))
+#Tools : 
+def charger_tableu(way):
+    '''retourne la liste de dictionnaire de tout le fichier CSV
+    (False si vide) '''
+    stock_actuel=[]
+    with open(way, 'r', encoding = "UTF-8", newline='') as f : 
+        stock_actuel = list(csv.DictReader(f, delimiter=';'))
+        return stock_actuel 
     
-    #MAJ de la liste
-    for nv_produit in liste_arrivage : 
-        trouve = False 
-        for ac_produit in stock_actuel : 
-            if nv_produit['referance'] == ac_produit['referance'] : 
-                total = int(ac_produit['cantité']) + int(nv_produit['cantité'])
-                ac_produit['cantité'] = str(total)
-                trouve = True
-                break
-        if trouve == False : 
-            stock_actuel.append(nv_produit)
-    
-    #remplire le fichier 
-    with open(chemain_stock, 'w', encoding='UTF-8',newline='') as f : 
-        scripteur = csv.DictWriter(f, fieldnames=colonne, delimiter=';') 
-        scripteur.writeheader() 
-        scripteur.writerows(stock_actuel) 
-        
-        
-        
-        
-        
-        
 
-def verification(ref):
+def verification(ref, way):
     '''verifie si un produit et disponible dans le ficher
     renvoie un dictionnaire du produit si oui, sinon revoie None'''
     stock_actuel =[]
-    with open (chemain_stock, 'r', encoding = "UTF-8",newline='') as f :
+    with open (way, 'r', encoding = "UTF-8",newline='') as f :
         stock_actuel = list(csv.DictReader(f, delimiter=';'))
         info_produit = None
         for produit in stock_actuel : 
@@ -57,24 +26,55 @@ def verification(ref):
         return info_produit
 
 
+
+
+def recevoire_produit(liste_arrivage, way,colonne): 
+    '''reçois les produit ajouter (liste de dictionnaire)
+    et les charge dans le fichier stock'''
+    stock_actuel = []
+    print(f'reception de {len(liste_arrivage)} produit(s)')
+    #lire le fichier en entier : 
+    with open(way, 'r', encoding = 'UTF-8',newline='') as f : 
+            stock_actuel=list(csv.DictReader(f,delimiter=';'))
+    
+    #MAJ de la liste
+    for nv_produit in liste_arrivage : 
+        trouve = False 
+        for ac_produit in stock_actuel : 
+            if nv_produit['referance'] == ac_produit['referance'] : 
+                total = int(ac_produit['cantité']) + int(nv_produit['cantité'])
+                ac_produit['cantité'] = str(total)
+                ac_produit['PU'] = nv_produit['PU']
+                ac_produit['PV'] = nv_produit['PV']
+                trouve = True
+                break
+        if trouve == False : 
+            stock_actuel.append(nv_produit)
+    
+    #remplire le fichier 
+    with open(way, 'w', encoding='UTF-8',newline='') as f : 
+        scripteur = csv.DictWriter(f, fieldnames=colonne, delimiter=';') 
+        scripteur.writeheader() 
+        scripteur.writerows(stock_actuel) 
         
-def vendue(dicto_result, q_vente): 
+             
+def vendue(dicto_result, q_vente, way, way_2, colonne_stock, colonne_attente): 
     
     stock_actuel=[]
     #1.charger du fichier stock
-    with open(chemain_stock, 'r', encoding="UTF-8", newline= '') as f : 
+    with open(way, 'r', encoding="UTF-8", newline= '') as f : 
         stock_actuel = list(csv.DictReader(f,delimiter=';')) 
     
     #2.MAJ stock
     stock_actuel_att=[]
     for produit_1 in stock_actuel : 
         if produit_1['referance'] == dicto_result['referance'] : 
-            if q_vente <= int(produit_1['cantité']) : 
-                produit_1['cantité'] = str(int(produit_1['cantité']) - q_vente)
+            if int(q_vente) <= int(produit_1['cantité']) : 
+                produit_1['cantité'] = str(int(produit_1['cantité']) - int(q_vente))
                 
                 #2.1.charger du fichier attente
                 try :
-                    with open(chemain_attente, 'r', encoding = 'UTF-8', newline='') as g : 
+                    with open(way_2, 'r', encoding = 'UTF-8', newline='') as g : 
                         stock_actuel_att = list(csv.DictReader(g, delimiter=';'))
                 except : 
                     pass
@@ -83,17 +83,18 @@ def vendue(dicto_result, q_vente):
                 Trouve = False
                 for produit_2 in stock_actuel_att : 
                     if produit_2['referance'] == dicto_result['referance'] : 
-                        produit_2['cantité'] = str(int(produit_2['cantité']) + q_vente)
-                        produit_2['DV'] = datetime.date.today()
+                        produit_2['cantité'] = str(int(produit_2['cantité']) + int(q_vente))
+                        produit_2['DE'] = datetime.date.today() + datetime.timedelta(days=3)
                         Trouve = True
                         break
                 if Trouve == False :
-                    dicto_result['DV'] = datetime.date.today()
-                    stock_actuel_att.append(dicto_result)
+                    copy_dicto_result = dicto_result.copy()
+                    copy_dicto_result['cantité'] = q_vente
+                    copy_dicto_result['DE'] = datetime.date.today() + datetime.timedelta(days=3)
+                    stock_actuel_att.append(copy_dicto_result)
     
-                
                 #2.3.remplir le fichier attente et fermer
-                with open(chemain_attente, 'w', encoding= 'UTF-8', newline='') as g : 
+                with open(way_2, 'w', encoding= 'UTF-8', newline='') as g : 
                     writer_2 = csv.DictWriter(g, fieldnames = colonne_attente ,delimiter=';')
                     writer_2.writeheader()
                     writer_2.writerows(stock_actuel_att)
@@ -102,32 +103,48 @@ def vendue(dicto_result, q_vente):
             else : 
                 print("cantité indisponible !")
         
-    
-    
     #3.remplire le fichier stock et fermer
-    with open(chemain_stock, 'w', encoding = 'UTF-8', newline='') as f : 
-        writer = csv.DictWriter(f, fieldnames= colonne , delimiter= ';')
+    with open(way, 'w', encoding = 'UTF-8', newline='') as f : 
+        writer = csv.DictWriter(f, fieldnames= colonne_stock , delimiter= ';')
         writer.writeheader()
         writer.writerows(stock_actuel)
         
-
-def afficher_tableu():
-    '''retourne la liste de dictionnaire de tout le fichier CSV'''
-    stock_actuel=[]
-    with open(chemain_stock, 'r', encoding = "UTF-8", newline='') as f : 
-        stock_actuel = list(csv.DictReader(f, delimiter=';'))
-        return stock_actuel 
+      
+def netoyage_attente(chemain_attente, chemain_historique, colonne_attente, colonne_historique) : 
+    #charger les données du fichier attente
+    stock_total  = []
+    stock_expire = []
+    stock_attente= []
+    try : 
+        with open(chemain_attente, 'r', encoding='UTF-8', newline='') as a : 
+            stock_total = list(csv.DictReader(a, delimiter=';'))
+    except :
+        pass
         
-def verification_stock_attente():
-    today = datetime.date.today()
-    
-    stock_actuel=[]
-    with open(chemain_attente , 'r' , encoding= "UTF-8", newline='') as a : 
-        stock_actuel = csv.DictReader(a , delimiter=';')
-    
-    for produit in stock_actuel : 
-        if produit['DV'] == today  : 
-            pass
-            
+    #MAJ
+    for produit in stock_total : 
         
+        today = datetime.date.today()
+        date_verifier = produit["DE"]
+        date_verifier = datetime.date.fromisoformat(date_verifier)
+        
+        if today >= date_verifier : 
+            stock_expire.append(produit)
+        else : 
+            stock_attente.append(produit)
+    
+    
+    #remplire le fichier attente
+    with open(chemain_attente,   'w',encoding="UTF-8", newline='') as a : 
+        writer  = csv.DictWriter(a,  fieldnames=colonne_attente,   delimiter=';')
+        writer.writeheader()
+        writer.writerows(stock_attente)
+        
+    #remplire le fichier historique 
+    if stock_expire : 
+        with open(chemain_historique, 'a',encoding="UTF-8", newline='') as h : 
+            writer_2 = csv.DictWriter(h, fieldnames= colonne_historique, delimiter=';')
+            if os.path.getsize(chemain_historique) == 0 : 
+                writer_2.writeheader()
+            writer_2.writerows(stock_expire)
     
