@@ -1,5 +1,6 @@
 from tabulate import tabulate
 import os 
+import datetime
 
 import gestion_stock 
 import finance
@@ -14,16 +15,18 @@ a faire :
     améliorer la logique de produit arriver /done
     imbriquer les choix d'acces au stock (ajouter des options)  /done
     imbriquer la possibilité de calculer l'argent de historique, attente dans finance /done
-    rendre les produit retourner dans le stock
+    rendre les produit retourner dans le stock 
     supprimer les produits completement vide du fichier 
-    travailler sur le passage par copie du dictionnaire
+    travailler sur le passage par copie du dictionnaire  
 '''
 
 
 #DATA
-colonne_stock      = ['nom','referance','cantité','PU','PV']
-colonne_attente    = ['nom','referance','cantité','PU','PV','DE']
-colonne_historique = ['nom','referance','cantité','PU','PV','DE']
+colonne_stock      = ['nom','referance','cantité','PU','PV','total_PU','DA']
+colonne_attente    = ['nom','referance','cantité','PU','PV','total_PU','DE']
+colonne_historique = ['nom','referance','cantité','PU','PV','total_PU','DE']
+
+
 
 #Way
 chemain_stock      = r'C:\CODE\code python\projet-gestion-stock.-py\stock.csv'
@@ -33,7 +36,7 @@ chemain_historique = r'C:\CODE\code python\projet-gestion-stock.-py\historique.c
 
 
 def nettoyer():
-    if os.name == 'nt':
+    if os.name == 'nt': 
         os.system('cls')
     else:
         os.system('clear')
@@ -57,7 +60,11 @@ while True :
         while True : 
             produit = {}
             for CP in colonne_stock : 
+                if CP == 'total_PU' or CP == 'DA' : 
+                    continue
                 produit[CP] = str(input(f"veuillez entrer le {CP} : "))
+            produit['total_PU'] = str(int(produit['PU'])*int(produit['cantité']))
+            produit['DA'] = datetime.date.today()
             liste_produit.append(produit)
             choix= input('ajouter un nouveau produit ? (O/N) : ') 
             if choix.upper() == 'O'  : 
@@ -65,7 +72,7 @@ while True :
             else : 
                 break
         nettoyer() 
-        gestion_stock.recevoire_produit(liste_produit, chemain_stock,colonne_stock)
+        gestion_stock.recevoire_produit(liste_produit, chemain_stock, colonne_stock)
         input("\cliqur sur [ENTRER] pour revenir au menue")
 
 

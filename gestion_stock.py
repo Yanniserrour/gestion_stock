@@ -46,6 +46,7 @@ def recevoire_produit(liste_arrivage, way,colonne):
                 ac_produit['cantité'] = str(total)
                 ac_produit['PU'] = nv_produit['PU']
                 ac_produit['PV'] = nv_produit['PV']
+                ac_produit['DA'] = nv_produit['DA']
                 trouve = True
                 break
         if trouve == False : 
@@ -71,6 +72,7 @@ def vendue(dicto_result, q_vente, way, way_2, colonne_stock, colonne_attente):
         if produit_1['referance'] == dicto_result['referance'] : 
             if int(q_vente) <= int(produit_1['cantité']) : 
                 produit_1['cantité'] = str(int(produit_1['cantité']) - int(q_vente))
+                produit_1['total_PU']= str(int(produit_1['total_PU']) - int(produit_1['PU']) * int(q_vente))
                 
                 #2.1.charger du fichier attente
                 try :
@@ -84,12 +86,16 @@ def vendue(dicto_result, q_vente, way, way_2, colonne_stock, colonne_attente):
                 for produit_2 in stock_actuel_att : 
                     if produit_2['referance'] == dicto_result['referance'] : 
                         produit_2['cantité'] = str(int(produit_2['cantité']) + int(q_vente))
+                        produit_2['total_PU']= str(int(produit_2['total_PU']) + int(produit_2['PU'])*int(q_vente))
                         produit_2['DE'] = datetime.date.today() + datetime.timedelta(days=3)
                         Trouve = True
                         break
                 if Trouve == False :
                     copy_dicto_result = dicto_result.copy()
+                    del copy_dicto_result['DA']
                     copy_dicto_result['cantité'] = q_vente
+                    prix_TTPU = str(int(copy_dicto_result['PU']) * int(copy_dicto_result['cantité']))
+                    copy_dicto_result['total_PU'] = prix_TTPU
                     copy_dicto_result['DE'] = datetime.date.today() + datetime.timedelta(days=3)
                     stock_actuel_att.append(copy_dicto_result)
     
