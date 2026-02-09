@@ -1,4 +1,4 @@
-# 📦 Gestion de Stock Python
+# 📦 Gestion de Stock
 
 Un logiciel simple et efficace pour gérer les entrées/sorties de stock, avec un système d'archivage automatique.
 
