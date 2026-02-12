@@ -17,6 +17,7 @@ a faire :
     imbriquer la possibilité de calculer l'argent de historique, attente dans finance /done
     rendre les produit retourner dans le stock 
     supprimer les produits completement vide du fichier 
+    généralisation
     travailler sur le passage par copie du dictionnaire  
 '''
 
@@ -29,9 +30,9 @@ colonne_historique = ['nom','referance','cantité','PU','PV','total_PU','DE']
 
 
 #Way
-chemain_stock      = r'C:\CODE\code python\projet-gestion-stock.-py\stock.csv'
-chemain_attente    = r'C:\CODE\code python\projet-gestion-stock.-py\attente.csv'
-chemain_historique = r'C:\CODE\code python\projet-gestion-stock.-py\historique.csv'
+chemain_stock      = r'C:\CODE\code_python\projet-gestion-stock.-py\stock.csv'
+chemain_attente    = r'C:\CODE\code_python\projet-gestion-stock.-py\attente.csv'
+chemain_historique = r'C:\CODE\code_python\projet-gestion-stock.-py\historique.csv'
 
 
 
@@ -40,6 +41,20 @@ def nettoyer():
         os.system('cls')
     else:
         os.system('clear')
+    
+stock_attente = gestion_stock.charger_tableu(chemain_attente)
+if stock_attente : 
+    print(10*' ',"les produit en attente") 
+    print(tabulate(stock_attente,headers="keys", tablefmt="fancy_grid" ))
+    ref=input('entrer le produit retourner : ')
+    q_retourner=input("entrer la cantité retourner : ")
+    result=gestion_stock.verification(ref, chemain_attente)
+    if result == None : 
+        print("produit indisponible !")
+    else : 
+        gestion_stock.retourner(chemain_attente, chemain_stock,colonne_attente, colonne_stock, result, q_retourner)
+        
+
 
 gestion_stock.netoyage_attente(chemain_attente, chemain_historique , colonne_attente, colonne_historique)
 while True : 
@@ -169,4 +184,3 @@ while True :
     elif choix == 5 : 
         print("au revoire !")
         break
-

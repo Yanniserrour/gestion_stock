@@ -116,6 +116,56 @@ def vendue(dicto_result, q_vente, way, way_2, colonne_stock, colonne_attente):
         writer.writerows(stock_actuel)
         
       
+def retourner(way_1, way_2, colonne_1, colonne_2, result, q_retourner):
+    #lire le fichier stock et le fichier attente
+    attente_actuel = charger_tableu(way_1)
+    stock_actuel   = charger_tableu(way_2)
+    
+    
+    #MAJ
+    ref_cible = result["referance"]
+    for produit in attente_actuel : 
+        if produit["referance"] == ref_cible : 
+            nouvelle_q = str(int(produit['cantité']) - int(q_retourner))
+            produit['cantité'] = nouvelle_q
+            produit['total_PU']= str(int(nouvelle_q) * int(produit["PU"]))
+            break 
+        
+    trouve_dans_stock = False
+    for produit in stock_actuel : 
+        if produit['referance'] == ref_cible : 
+            nouvelle_q = str(int(produit['cantité']) + int(q_retourner))
+            produit["cantité"] = nouvelle_q
+            produit["total_PU"]= str(int(nouvelle_q) * int(produit["PU"]))
+            trouve_dans_stock = True 
+            break 
+            
+    if not trouve_dans_stock : 
+        nouveau_p = result.copy()
+        nouveau_p["cantité"] = q_retourner
+        nouveau_p["total_PU"]= str(int(q_retourner) * int(nouveau_p["PU"]))
+            
+        if "DE" in nouveau_p: 
+            del nouveau_p["DE"]
+            nouveau_p["DA"] = datetime.date.today()
+
+        stock_actuel.append(nouveau_p)
+            
+        
+    
+    #ecrire dans les fichier 
+    with open(way_2, 'w', encoding="UTF-8", newline='') as s : 
+        writer = csv.DictWriter(s, delimiter=';' ,fieldnames= colonne_2)
+        writer.writeheader()
+        writer.writerows(stock_actuel)
+        
+    with open(way_1, 'w', encoding="UTF-8", newline='') as s : 
+        writer = csv.DictWriter(s, delimiter=';' ,fieldnames= colonne_1)
+        writer.writeheader()
+        writer.writerows(attente_actuel)
+        
+    print("Retour effectué avec succès !")
+    
 def netoyage_attente(chemain_attente, chemain_historique, colonne_attente, colonne_historique) : 
     #charger les données du fichier attente
     stock_total  = []
@@ -153,4 +203,10 @@ def netoyage_attente(chemain_attente, chemain_historique, colonne_attente, colon
             if os.path.getsize(chemain_historique) == 0 : 
                 writer_2.writeheader()
             writer_2.writerows(stock_expire)
+    
+
+
+
+    
+    
     
