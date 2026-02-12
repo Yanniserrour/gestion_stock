@@ -9,15 +9,16 @@ import finance
 '''
 a faire : 
     ajouter l'acces des fichier dans main  /done 
-    netoyyer les nom de fonctions et de varialbes /done
+    netoyyer les noms de fonctions et de varialbes /done
     ajouter les colonnes comme effectifs  /done
     ameliorer la logique de vente stock -> attente -> historique /done
     améliorer la logique de produit arriver /done
     imbriquer les choix d'acces au stock (ajouter des options)  /done
     imbriquer la possibilité de calculer l'argent de historique, attente dans finance /done
-    rendre les produit retourner dans le stock 
-    supprimer les produits completement vide du fichier 
+    rendre les produit retourner dans le stock /done
     généralisation
+    supprimer les produits completement vide du fichier 
+    ameliorer l'affichage 
     travailler sur le passage par copie du dictionnaire  
 '''
 
@@ -41,19 +42,30 @@ def nettoyer():
         os.system('cls')
     else:
         os.system('clear')
-    
-stock_attente = gestion_stock.charger_tableu(chemain_attente)
-if stock_attente : 
-    print(10*' ',"les produit en attente") 
-    print(tabulate(stock_attente,headers="keys", tablefmt="fancy_grid" ))
-    ref=input('entrer le produit retourner : ')
-    q_retourner=input("entrer la cantité retourner : ")
-    result=gestion_stock.verification(ref, chemain_attente)
-    if result == None : 
-        print("produit indisponible !")
-    else : 
-        gestion_stock.retourner(chemain_attente, chemain_stock,colonne_attente, colonne_stock, result, q_retourner)
         
+    
+nettoyer()   
+
+ 
+stock_attente = gestion_stock.charger_fichier(chemain_attente)
+if stock_attente : 
+    print(30*'==')
+    print("les produit en attente") 
+    print(tabulate(stock_attente,headers="keys", tablefmt="fancy_grid" ))
+    print(30*'==')
+    choix_0 = input("y a il un retour (O/N)")
+    if choix_0.upper() == 'O' :
+        ref=input('entrer le produit retourner : ')
+        q_retourner=input("entrer la cantité retourner : ")
+        result=gestion_stock.verification(ref, chemain_attente)
+        if result == None : 
+            nettoyer()
+            print("produit indisponible !")
+        else :
+            nettoyer()
+            gestion_stock.retourner(result, q_retourner, chemain_attente, chemain_stock,colonne_attente, colonne_stock)
+    else : 
+        pass  
 
 
 gestion_stock.netoyage_attente(chemain_attente, chemain_historique , colonne_attente, colonne_historique)
@@ -122,7 +134,7 @@ while True :
             print(10*"==")
             choix_3 = int(input('entrez votre choix : '))
             if  choix_3 == 1 : 
-                total_stock = gestion_stock.charger_tableu(chemain_stock)
+                total_stock = gestion_stock.charger_fichier(chemain_stock)
                 if total_stock != None :
                     print(tabulate(total_stock, headers="keys", tablefmt="fancy_grid")) 
                 else : 
@@ -130,7 +142,7 @@ while True :
                 input("\cliqur sur [ENTRER] pour revenir au menue")
                 nettoyer()
             elif choix_3 == 2 : 
-                total_stock = gestion_stock.charger_tableu(chemain_attente)
+                total_stock = gestion_stock.charger_fichier(chemain_attente)
                 if total_stock != None : 
                     print(tabulate(total_stock, headers="keys", tablefmt="fancy_grid"))
                 else : 
@@ -138,7 +150,7 @@ while True :
                 input("\cliqur sur [ENTRER] pour revenir au menue")
                 nettoyer()
             elif choix_3 == 3 : 
-                total_stock = gestion_stock.charger_tableu(chemain_historique)
+                total_stock = gestion_stock.charger_fichier(chemain_historique)
                 if total_stock != False : 
                     print(tabulate(total_stock, headers="keys", tablefmt="fancy_grid"))
                 else : 
@@ -158,21 +170,21 @@ while True :
             print(10*"==")
             choix_4 = int(input("entrer votre choix : "))
             if  choix_4 == 1 : 
-                total_stock = gestion_stock.charger_tableu(chemain_stock)
+                total_stock = gestion_stock.charger_fichier(chemain_stock)
                 prix_total = finance.calculer_prix_total(total_stock)
                 nettoyer() 
                 print(f"la somme total est  : {prix_total} DA")
                 input("\ckiquer sur [ENTRER] pour revenir au menue ")
                 nettoyer()
             elif choix_4 == 2 : 
-                total_stock = gestion_stock.charger_tableu(chemain_attente)
+                total_stock = gestion_stock.charger_fichier(chemain_attente)
                 prix_total = finance.calculer_prix_total(total_stock)
                 nettoyer()
                 print(f"la somme total est {prix_total} DA")
                 input("\ckiquer sur [ENTRER] pour revenir au menue ")
                 nettoyer()
             elif choix_4 == 3 : 
-                total_stock = gestion_stock.charger_tableu(chemain_historique)
+                total_stock = gestion_stock.charger_fichier(chemain_historique)
                 prix_total = finance.calculer_prix_total(total_stock)
                 nettoyer()
                 print(f"la somme total est {prix_total} DA")
